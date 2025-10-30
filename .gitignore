@@ -1,0 +1,116 @@
+# ============================================
+# Python
+# ============================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# ============================================
+# Virtual Environment
+# ============================================
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+
+# ============================================
+# IDE & Editors
+# ============================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.pydevproject
+.settings/
+
+# ============================================
+# Jupyter Notebook
+# ============================================
+.ipynb_checkpoints
+*.ipynb_checkpoints/
+notebooks/.ipynb_checkpoints/
+
+# ============================================
+# Models (LARGE FILES - DON'T COMMIT!)
+# ============================================
+models/*.pkl
+models/*.joblib
+*.pkl
+*.joblib
+*.h5
+*.pth
+*.onnx
+
+# ============================================
+# Data (LARGE FILES - DON'T COMMIT!)
+# ============================================
+data/faces/*
+data/non_faces/*
+data/*.json
+!data/.gitkeep
+!data/faces/.gitkeep
+!data/non_faces/.gitkeep
+
+# ============================================
+# Reports & Outputs
+# ============================================
+reports/*.png
+reports/*.jpg
+reports/*.json
+reports/*.txt
+screenshots/
+output/
+
+# ============================================
+# OS Files
+# ============================================
+.DS_Store
+Thumbs.db
+desktop.ini
+*.lnk
+
+# ============================================
+# Temporary & Test Files
+# ============================================
+*.log
+*.tmp
+*.cache
+*.bak
+screenshot_*.jpg
+screenshot_*.png
+output*.jpg
+output*.png
+result*.jpg
+result*.png
+test_output/
+temp/
+
+# ============================================
+# Git & Version Control
+# ============================================
+.git/
+*.orig
