@@ -3,8 +3,9 @@ Inference pipeline for image and video processing.
 """
 import cv2
 import numpy as np
+import time
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Tuple, Dict, Optional
 from .utils import logger, Timer, non_maximum_suppression, get_cascade_path
 from .features import FeaturePipeline, ORBFeatureExtractor, BoVWEncoder
 from .train import SVMTrainer
@@ -45,9 +46,9 @@ class FaceDetector:
         logger.info("Face detector initialized successfully")
     
     def detect_candidates(self, image: np.ndarray,
-                         scale_factor: float = 1.1,
-                         min_neighbors: int = 5,
-                         min_size: Tuple[int, int] = (30, 30)) -> List[Tuple[int, int, int, int]]:
+                         scale_factor: float = 1.12,
+                         min_neighbors: int = 7,
+                         min_size: Tuple[int, int] = (40, 40)) -> List[Tuple[int, int, int, int]]:
         """
         Detect face candidates using Haar cascade.
         
@@ -87,15 +88,24 @@ class FaceDetector:
         bovw_features = self.bovw_encoder.encode(descriptors)
         bovw_features = bovw_features.reshape(1, -1)
         
-        # Classify
-        prediction = self.classifier.predict(bovw_features)[0]
-        score = self.classifier.decision_function(bovw_features)[0]
+        # Classify with better confidence handling
+        if hasattr(self.classifier.svm, 'predict_proba') and self.classifier.svm.probability:
+            # Use probability for better confidence (0-1 range)
+            probas = self.classifier.svm.predict_proba(bovw_features)[0]
+            prediction = int(probas[1] > 0.5)  # Face if probability > 0.5
+            confidence = probas[1]  # Probability of being face
+        else:
+            # Fallback to decision function
+            prediction = self.classifier.predict(bovw_features)[0]
+            decision = self.classifier.decision_function(bovw_features)[0]
+            # Convert decision to confidence (0-1 range)
+            confidence = 1.0 / (1.0 + np.exp(-decision))  # Sigmoid
         
-        return int(prediction), float(score)
+        return int(prediction), float(confidence)
     
     def detect(self, image: np.ndarray,
-               confidence_threshold: float = 0.0,
-               nms_threshold: float = 0.3) -> Tuple[List[Tuple[int, int, int, int]], List[float]]:
+               confidence_threshold: float = 0.96,
+               nms_threshold: float = 0.2) -> Tuple[List[Tuple[int, int, int, int]], List[float]]:
         """
         Detect faces in image using full pipeline.
         
@@ -153,7 +163,7 @@ class ImageInference:
         
         Args:
             model_dir: Directory with trained models
-            mask_path: Path to mask PNG
+            mask_path: Path to specific mask PNG (for backward compatibility)
         """
         self.detector = FaceDetector(model_dir)
         self.mask_overlay = MaskOverlay(mask_path) if mask_path else None
@@ -214,16 +224,105 @@ class ImageInference:
 class VideoInference:
     """Inference on video streams."""
     
-    def __init__(self, model_dir: str = 'models', mask_path: str = None):
+    def __init__(self, model_dir: str = 'models', mask_dir: str = 'assets'):
         """
         Initialize video inference.
         
         Args:
             model_dir: Directory with trained models
-            mask_path: Path to mask PNG
+            mask_dir: Directory containing mask files (mask1.png - mask7.png)
         """
         self.detector = FaceDetector(model_dir)
-        self.mask_overlay = MaskOverlay(mask_path) if mask_path else None
+        self.mask_dir = Path(mask_dir)
+        
+        # Initialize face tracker for stability
+        self.face_tracker = FaceTracker(max_tracking_frames=8, iou_threshold=0.4)
+        
+        # Load all available masks
+        self.masks: Dict[int, MaskOverlay] = {}
+        for i in range(1, 8):  # mask1.png to mask7.png
+            mask_path = self.mask_dir / f'mask{i}.png'
+            if mask_path.exists():
+                try:
+                    self.masks[i] = MaskOverlay(str(mask_path))
+                    logger.info(f"Loaded mask{i}.png")
+                except Exception as e:
+                    logger.warning(f"Failed to load mask{i}.png: {e}")
+        
+        if not self.masks:
+            logger.warning("No masks loaded. Mask overlay will be disabled.")
+            self.current_mask_id = None
+        else:
+            # Default to mask1
+            self.current_mask_id = min(self.masks.keys())
+            available_masks = ", ".join([f"mask{i}" for i in sorted(self.masks.keys())])
+            logger.info(f"Available masks: {available_masks}")
+            logger.info(f"Default mask set to mask{self.current_mask_id}")
+        
+        # Start with mask disabled (for Godot compatibility)
+        self._mask_enabled = False
+        logger.info("Mask overlay disabled by default (waiting for user selection)")
+    
+    @property
+    def current_mask(self) -> MaskOverlay:
+        """Get current mask overlay."""
+        if self.current_mask_id is not None and self.current_mask_id in self.masks:
+            return self.masks[self.current_mask_id]
+        return None
+    
+    @property
+    def mask_enabled(self) -> bool:
+        """Check if mask is currently enabled."""
+        return hasattr(self, '_mask_enabled') and self._mask_enabled
+    
+    def toggle_mask(self):
+        """Toggle mask on/off."""
+        if not hasattr(self, '_mask_enabled'):
+            self._mask_enabled = True
+        self._mask_enabled = not self._mask_enabled
+    
+    def switch_mask(self, mask_num: int):
+        """Switch to a different mask."""
+        if mask_num in self.masks:
+            self.current_mask_id = mask_num
+            if not hasattr(self, '_mask_enabled'):
+                self._mask_enabled = True
+            self._mask_enabled = True
+        else:
+            logger.warning(f"Mask{mask_num} not available")
+    
+    def process_single_frame(self, frame: np.ndarray, enable_rotation: bool = False) -> np.ndarray:
+        """
+        Process a single frame with face detection and mask overlay.
+        
+        Args:
+            frame: Input frame (BGR)
+            enable_rotation: Enable mask rotation based on eyes
+        
+        Returns:
+            Processed frame with mask overlay
+        """
+        # Flip frame horizontally to remove mirror effect (for webcam)
+        frame = cv2.flip(frame, 1)
+        
+        # Detect faces
+        detected_faces, scores = self.detector.detect(frame)
+        
+        # Use face tracker for stability
+        stable_faces = self.face_tracker.update(detected_faces, scores)
+        
+        # Create result
+        result = frame.copy()
+        
+        # Check if mask is enabled
+        if not hasattr(self, '_mask_enabled'):
+            self._mask_enabled = True
+        
+        # Apply masks to stable faces
+        if self._mask_enabled and self.current_mask and len(stable_faces) > 0:
+            result = self.current_mask.batch_overlay(result, stable_faces, enable_rotation)
+        
+        return result
     
     def process_video(self, video_path: str = None, output_path: str = None,
                      camera_id: int = 0,
@@ -270,11 +369,30 @@ class VideoInference:
             writer = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
             logger.info(f"Writing output to {output_path}")
         
+        # FPS calculation variables
+        fps_counter = 0
+        fps_start_time = time.time()
+        current_fps = 0
+        fps_update_interval = 30  # Update FPS every 30 frames
+        
         # Processing loop
         frame_count = 0
         mask_enabled = apply_mask
         
-        logger.info("Press 'q' to quit, 'm' to toggle mask, 's' to screenshot")
+        logger.info("Controls:")
+        logger.info("  'q' - Quit")
+        logger.info("  'm' - Toggle mask")
+        logger.info("  '1-7' - Switch mask")
+        logger.info("  's' - Screenshot")
+        
+        # Setup display window with larger size
+        if show_display:
+            cv2.namedWindow('Face Detection', cv2.WINDOW_NORMAL)
+            # Set window size to be larger (1.5x the original size)
+            display_width = int(width * 1.5)
+            display_height = int(height * 1.5)
+            cv2.resizeWindow('Face Detection', display_width, display_height)
+            logger.info(f"Display window size: {display_width}x{display_height}")
         
         try:
             while True:
@@ -282,22 +400,49 @@ class VideoInference:
                 if not ret:
                     break
                 
+                # Flip frame horizontally to remove mirror effect (for webcam only)
+                if video_path is None:  # Only flip for webcam, not for video files
+                    frame = cv2.flip(frame, 1)
+                
                 frame_count += 1
+                fps_counter += 1
+                
+                # Calculate FPS
+                if fps_counter >= fps_update_interval:
+                    elapsed_time = time.time() - fps_start_time
+                    current_fps = fps_counter / elapsed_time if elapsed_time > 0 else 0
+                    fps_counter = 0
+                    fps_start_time = time.time()
                 
                 # Detect faces
-                face_boxes, scores = self.detector.detect(frame)
+                detected_faces, scores = self.detector.detect(frame)
+                
+                # Use face tracker for stability
+                stable_faces = self.face_tracker.update(detected_faces, scores)
                 
                 # Create result
                 result = frame.copy()
                 
-                # Apply masks
-                if mask_enabled and self.mask_overlay and len(face_boxes) > 0:
-                    result = self.mask_overlay.batch_overlay(result, face_boxes, enable_rotation)
+                # Apply masks to stable faces
+                if mask_enabled and self.current_mask and len(stable_faces) > 0:
+                    result = self.current_mask.batch_overlay(result, stable_faces, enable_rotation)
+                elif mask_enabled and not self.current_mask:
+                    logger.debug(f"Mask enabled but current_mask is None. current_mask_id: {self.current_mask_id}, available masks: {list(self.masks.keys())}")
                 
-                # Draw info
-                info_text = f"Faces: {len(face_boxes)} | Frame: {frame_count} | Mask: {'ON' if mask_enabled else 'OFF'}"
+                # Draw info (show both detected and stable faces count)
+                if mask_enabled and self.current_mask_id is not None:
+                    mask_info = f"Mask{self.current_mask_id}"
+                else:
+                    mask_info = "OFF"
+                info_text = f"Faces: {len(stable_faces)} ({len(detected_faces)}) | FPS: {current_fps:.1f} | Mask: {mask_info}"
                 cv2.putText(result, info_text, (10, 30),
                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+                
+                # Draw mask switching instructions
+                if len(self.masks) > 1:
+                    instruction_text = "Press 1-7 to switch masks"
+                    cv2.putText(result, instruction_text, (10, height - 20),
+                               cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
                 
                 # Write to output
                 if writer:
@@ -313,11 +458,22 @@ class VideoInference:
                         break
                     elif key == ord('m'):
                         mask_enabled = not mask_enabled
-                        logger.info(f"Mask overlay: {'ON' if mask_enabled else 'OFF'}")
+                        mask_status = "ON" if mask_enabled else "OFF"
+                        current_mask_name = f"mask{self.current_mask_id}" if self.current_mask_id else "none"
+                        logger.info(f"Mask overlay: {mask_status} (current: {current_mask_name})")
                     elif key == ord('s'):
                         screenshot_path = f"screenshot_{frame_count}.jpg"
                         cv2.imwrite(screenshot_path, result)
                         logger.info(f"Saved screenshot: {screenshot_path}")
+                    elif key in [ord(str(i)) for i in range(1, 8)]:
+                        # Switch mask
+                        mask_num = int(chr(key))
+                        if mask_num in self.masks:
+                            self.current_mask_id = mask_num
+                            mask_enabled = True  # Enable mask when switching
+                            logger.info(f"Switched to mask{mask_num} (mask enabled)")
+                        else:
+                            logger.warning(f"Mask{mask_num} not available")
         
         finally:
             cap.release()
@@ -327,3 +483,135 @@ class VideoInference:
                 cv2.destroyAllWindows()
             
             logger.info(f"Processed {frame_count} frames")
+
+
+class FaceTracker:
+    """Face tracking and smoothing for stable mask overlay."""
+    
+    def __init__(self, max_tracking_frames: int = 10, iou_threshold: float = 0.5):
+        """
+        Initialize face tracker.
+        
+        Args:
+            max_tracking_frames: Maximum frames to track without detection
+            iou_threshold: IoU threshold for face matching
+        """
+        self.max_tracking_frames = max_tracking_frames
+        self.iou_threshold = iou_threshold
+        self.tracked_faces = []  # List of tracked face info
+        self.face_id_counter = 0
+    
+    def calculate_iou(self, box1: Tuple[int, int, int, int], 
+                     box2: Tuple[int, int, int, int]) -> float:
+        """Calculate IoU between two boxes."""
+        x1, y1, w1, h1 = box1
+        x2, y2, w2, h2 = box2
+        
+        # Calculate intersection
+        xi1 = max(x1, x2)
+        yi1 = max(y1, y2)
+        xi2 = min(x1 + w1, x2 + w2)
+        yi2 = min(y1 + h1, y2 + h2)
+        
+        if xi2 <= xi1 or yi2 <= yi1:
+            return 0.0
+        
+        intersection = (xi2 - xi1) * (yi2 - yi1)
+        union = w1 * h1 + w2 * h2 - intersection
+        
+        return intersection / union if union > 0 else 0.0
+    
+    def smooth_box(self, current_box: Tuple[int, int, int, int], 
+                   previous_boxes: List[Tuple[int, int, int, int]], 
+                   alpha: float = 0.7) -> Tuple[int, int, int, int]:
+        """Smooth face box using exponential moving average."""
+        if not previous_boxes:
+            return current_box
+        
+        # Use last box for smoothing
+        prev_box = previous_boxes[-1]
+        
+        x = int(alpha * current_box[0] + (1 - alpha) * prev_box[0])
+        y = int(alpha * current_box[1] + (1 - alpha) * prev_box[1])
+        w = int(alpha * current_box[2] + (1 - alpha) * prev_box[2])
+        h = int(alpha * current_box[3] + (1 - alpha) * prev_box[3])
+        
+        return (x, y, w, h)
+    
+    def update(self, detected_faces: List[Tuple[int, int, int, int]], 
+               scores: List[float]) -> List[Tuple[int, int, int, int]]:
+        """
+        Update tracked faces with new detections.
+        
+        Args:
+            detected_faces: New face detections
+            scores: Confidence scores for detections
+        
+        Returns:
+            Stable face boxes
+        """
+        current_time = time.time()
+        
+        # Match detections to existing tracks
+        matched_tracks = []
+        unmatched_detections = list(range(len(detected_faces)))
+        
+        for track in self.tracked_faces:
+            best_match_idx = -1
+            best_iou = 0
+            
+            for i, face_box in enumerate(detected_faces):
+                if i in unmatched_detections:
+                    iou = self.calculate_iou(track['predicted_box'], face_box)
+                    if iou > best_iou and iou > self.iou_threshold:
+                        best_iou = iou
+                        best_match_idx = i
+            
+            if best_match_idx >= 0:
+                # Update existing track
+                detected_box = detected_faces[best_match_idx]
+                smoothed_box = self.smooth_box(detected_box, track['boxes'])
+                
+                track['boxes'].append(smoothed_box)
+                track['predicted_box'] = smoothed_box
+                track['last_seen'] = current_time
+                track['consecutive_misses'] = 0
+                track['confidence'] = scores[best_match_idx] if best_match_idx < len(scores) else 0.5
+                
+                # Keep only recent boxes for smoothing
+                if len(track['boxes']) > 5:
+                    track['boxes'] = track['boxes'][-5:]
+                
+                matched_tracks.append(track)
+                unmatched_detections.remove(best_match_idx)
+            else:
+                # Track not matched, predict next position
+                track['consecutive_misses'] += 1
+                if track['consecutive_misses'] <= self.max_tracking_frames:
+                    matched_tracks.append(track)
+        
+        # Create new tracks for unmatched detections
+        for i in unmatched_detections:
+            face_box = detected_faces[i]
+            confidence = scores[i] if i < len(scores) else 0.5
+            
+            new_track = {
+                'id': self.face_id_counter,
+                'boxes': [face_box],
+                'predicted_box': face_box,
+                'last_seen': current_time,
+                'consecutive_misses': 0,
+                'confidence': confidence
+            }
+            matched_tracks.append(new_track)
+            self.face_id_counter += 1
+        
+        self.tracked_faces = matched_tracks
+        
+        # Return stable face boxes
+        stable_faces = []
+        for track in self.tracked_faces:
+            if track['consecutive_misses'] <= 3:  # Only return recently seen faces
+                stable_faces.append(track['predicted_box'])
+        
+        return stable_faces

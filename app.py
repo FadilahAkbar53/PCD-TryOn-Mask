@@ -5,7 +5,13 @@ Usage:
     python app.py train --pos_dir data/faces --neg_dir data/non_faces
     python app.py eval --report reports/test_metrics.json
     python app.py infer --image input.jpg --out output.jpg --mask assets/mask.png
-    python app.py webcam --camera 0 --mask assets/mask.png --show
+    python app.py webcam --camera 0 --mask_dir assets --show
+
+Webcam Controls:
+    'q' - Quit
+    'm' - Toggle mask on/off
+    '1-7' - Switch between mask1.png to mask7.png
+    's' - Take screenshot
 """
 import argparse
 import sys
@@ -218,15 +224,10 @@ def webcam_command(args):
     logger.info("WEBCAM INFERENCE")
     logger.info("=" * 60)
     
-    # Check mask file
-    if args.mask and not Path(args.mask).exists():
-        logger.error(f"Mask file not found: {args.mask}")
-        sys.exit(1)
-    
-    # Initialize inference
+    # Initialize inference with mask directory instead of single mask
     inference = VideoInference(
         model_dir=args.model_dir,
-        mask_path=args.mask
+        mask_dir=args.mask_dir
     )
     
     # Process webcam
@@ -234,7 +235,7 @@ def webcam_command(args):
         video_path=None,
         output_path=args.out,
         camera_id=args.camera,
-        apply_mask=args.mask is not None,
+        apply_mask=True,  # Always try to apply mask if available
         enable_rotation=args.rotate,
         show_display=args.show
     )
@@ -308,8 +309,8 @@ def main():
     webcam_parser = subparsers.add_parser('webcam', help='Run inference on webcam')
     webcam_parser.add_argument('--camera', type=int, default=0,
                               help='Camera ID')
-    webcam_parser.add_argument('--mask', type=str, default=None,
-                              help='Path to mask PNG')
+    webcam_parser.add_argument('--mask_dir', type=str, default='assets',
+                              help='Directory containing mask files (mask1.png - mask7.png)')
     webcam_parser.add_argument('--model_dir', type=str, default='models',
                               help='Directory with trained models')
     webcam_parser.add_argument('--rotate', action='store_true',

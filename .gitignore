@@ -55,25 +55,20 @@ venv.bak/
 notebooks/.ipynb_checkpoints/
 
 # ============================================
-# Models (LARGE FILES - DON'T COMMIT!)
+# Models - INCLUDED in repo (user wants to push models)
 # ============================================
-models/*.pkl
-models/*.joblib
-*.pkl
-*.joblib
-*.h5
-*.pth
-*.onnx
+# Uncomment below if you want to exclude large model files later
+# models/*.pkl
+# models/*.joblib
+# *.h5
+# *.pth
+# *.onnx
 
 # ============================================
 # Data (LARGE FILES - DON'T COMMIT!)
 # ============================================
-data/faces/*
-data/non_faces/*
-data/*.json
-!data/.gitkeep
-!data/faces/.gitkeep
-!data/non_faces/.gitkeep
+data/
+# Exclude entire data folder to avoid pushing dataset
 
 # ============================================
 # Reports & Outputs

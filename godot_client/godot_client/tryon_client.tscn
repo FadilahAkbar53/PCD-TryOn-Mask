@@ -1,0 +1,239 @@
+[gd_scene load_steps=5 format=3 uid="uid://b4pn3jnpxhvc7"]
+
+[ext_resource type="Script" uid="uid://borxqwgw88b8x" path="res://tryon_client.gd" id="1_main"]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_yv3nw"]
+
+[sub_resource type="Theme" id="Theme_yne4t"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0d4wo"]
+bg_color = Color(0.117647, 0.117647, 0.117647, 0.207843)
+
+[node name="TryOnClient" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_main")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.15, 0.15, 0.15, 1)
+
+[node name="WebcamContainer" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="WebcamDisplay" type="TextureRect" parent="WebcamContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 6
+
+[node name="InfoOverlay" type="VBoxContainer" parent="WebcamContainer"]
+material = SubResource("CanvasItemMaterial_yv3nw")
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -250.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = 150.0
+grow_horizontal = 0
+theme = SubResource("Theme_yne4t")
+
+[node name="StatusPanel" type="PanelContainer" parent="WebcamContainer/InfoOverlay"]
+layout_mode = 2
+
+[node name="BgStyle" type="ColorRect" parent="WebcamContainer/InfoOverlay/StatusPanel"]
+layout_mode = 2
+color = Color(0, 0, 0, 0.6)
+
+[node name="VBox" type="VBoxContainer" parent="WebcamContainer/InfoOverlay/StatusPanel"]
+layout_mode = 2
+
+[node name="StatusLabel" type="Label" parent="WebcamContainer/InfoOverlay/StatusPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 1, 0.4, 1)
+theme_override_font_sizes/font_size = 14
+text = "Status: Waiting..."
+horizontal_alignment = 1
+
+[node name="InfoLabel" type="Label" parent="WebcamContainer/InfoOverlay/StatusPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+theme_override_font_sizes/font_size = 12
+text = "FPS: 0 | 640x480"
+horizontal_alignment = 1
+
+[node name="FaceDetectionLabel" type="Label" parent="WebcamContainer/InfoOverlay/StatusPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.8, 1, 1)
+theme_override_font_sizes/font_size = 13
+text = "Wajah Terdeteksi: 0"
+horizontal_alignment = 1
+
+[node name="MaskPreviewPanel" type="PanelContainer" parent="WebcamContainer/InfoOverlay"]
+custom_minimum_size = Vector2(0, 140)
+layout_mode = 2
+
+[node name="BgStyle" type="ColorRect" parent="WebcamContainer/InfoOverlay/MaskPreviewPanel"]
+layout_mode = 2
+color = Color(0, 0, 0, 0.6)
+
+[node name="MarginContainer" type="MarginContainer" parent="WebcamContainer/InfoOverlay/MaskPreviewPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="MaskPreview" type="TextureRect" parent="WebcamContainer/InfoOverlay/MaskPreviewPanel/MarginContainer"]
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="MaskCarouselContainer" type="PanelContainer" parent="WebcamContainer"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -240.0
+offset_bottom = -40.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_0d4wo")
+
+[node name="BgStyle" type="ColorRect" parent="WebcamContainer/MaskCarouselContainer"]
+layout_mode = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0.5)
+
+[node name="MarginContainer" type="MarginContainer" parent="WebcamContainer/MaskCarouselContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 10
+
+[node name="VBox" type="VBoxContainer" parent="WebcamContainer/MaskCarouselContainer/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="CategoryButtonsContainer" type="HBoxContainer" parent="WebcamContainer/MaskCarouselContainer/MarginContainer/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 15
+alignment = 1
+
+[node name="MedicalButton" type="Button" parent="WebcamContainer/MaskCarouselContainer/MarginContainer/VBox/CategoryButtonsContainer"]
+custom_minimum_size = Vector2(150, 40)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "🏥 Masker Medis"
+
+[node name="HazardButton" type="Button" parent="WebcamContainer/MaskCarouselContainer/MarginContainer/VBox/CategoryButtonsContainer"]
+custom_minimum_size = Vector2(150, 40)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "⚠️ Masker Hazard"
+
+[node name="AccessoryButton" type="Button" parent="WebcamContainer/MaskCarouselContainer/MarginContainer/VBox/CategoryButtonsContainer"]
+custom_minimum_size = Vector2(150, 40)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "✨ Masker Aksesoris"
+
+[node name="MaskScrollContainer" type="ScrollContainer" parent="WebcamContainer/MaskCarouselContainer/MarginContainer/VBox"]
+custom_minimum_size = Vector2(0, 140)
+layout_mode = 2
+horizontal_scroll_mode = 2
+vertical_scroll_mode = 0
+
+[node name="CenterContainer" type="CenterContainer" parent="WebcamContainer/MaskCarouselContainer/MarginContainer/VBox/MaskScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="MaskHBoxContainer" type="HBoxContainer" parent="WebcamContainer/MaskCarouselContainer/MarginContainer/VBox/MaskScrollContainer/CenterContainer"]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="ToggleMenuButton" type="Button" parent="WebcamContainer"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -40.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_font_sizes/font_size = 14
+text = "▼ Sembunyikan Menu Masker"
+
+[node name="ToggleSettingsButton" type="Button" parent="."]
+layout_mode = 1
+offset_left = 10.0
+offset_top = 10.0
+offset_right = 150.0
+offset_bottom = 60.0
+theme_override_font_sizes/font_size = 20
+text = "⚙️ Settings"
+
+[node name="SettingsSidebar" type="PanelContainer" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_top = 70.0
+offset_right = 320.0
+offset_bottom = -250.0
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="SettingsSidebar"]
+layout_mode = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 15
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 15
+
+[node name="VBoxContainer" type="VBoxContainer" parent="SettingsSidebar/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="HeaderLabel" type="Label" parent="SettingsSidebar/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 24
+text = "Overlay Settings"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="SettingsSidebar/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="ControlsContainer" type="VBoxContainer" parent="SettingsSidebar/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[connection signal="pressed" from="WebcamContainer/MaskCarouselContainer/MarginContainer/VBox/CategoryButtonsContainer/MedicalButton" to="." method="_on_medical_button_pressed"]
+[connection signal="pressed" from="WebcamContainer/MaskCarouselContainer/MarginContainer/VBox/CategoryButtonsContainer/HazardButton" to="." method="_on_hazard_button_pressed"]
+[connection signal="pressed" from="WebcamContainer/MaskCarouselContainer/MarginContainer/VBox/CategoryButtonsContainer/AccessoryButton" to="." method="_on_accessory_button_pressed"]
+[connection signal="pressed" from="WebcamContainer/ToggleMenuButton" to="." method="_on_toggle_menu_button_pressed"]
+[connection signal="pressed" from="ToggleSettingsButton" to="." method="_on_toggle_settings_button_pressed"]
