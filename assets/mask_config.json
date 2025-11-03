@@ -1,0 +1,162 @@
+{
+  "medical": {
+    "name": "Masker Medis",
+    "icon": "🏥",
+    "masks": {
+      "1": {
+        "name": "Surgical",
+        "filename": "mask1.png",
+        "description": "Masker sekali pakai yang umum digunakan tenaga medis untuk mencegah penyebaran droplet dan partikel udara."
+      },
+      "2": {
+        "name": "KF94",
+        "filename": "mask2.png",
+        "description": "Masker asal Korea dengan desain lipatan 3D dan filtrasi tinggi, efektif melindungi dari debu halus dan aerosol."
+      },
+      "3": {
+        "name": "KN95",
+        "filename": "mask3.png",
+        "description": "Masker standar Tiongkok dengan efisiensi filtrasi hingga 95%, mirip dengan N95 namun lebih fleksibel."
+      },
+      "4": {
+        "name": "N95",
+        "filename": "mask4.png",
+        "description": "Masker respirator dengan kemampuan filtrasi tinggi, digunakan di lingkungan dengan risiko paparan partikel berbahaya."
+      },
+      "5": {
+        "name": "N95 Plus",
+        "filename": "mask5.png",
+        "description": "Versi pengembangan N95 dengan lapisan filtrasi ekstra dan kenyamanan lebih untuk pemakaian jangka panjang."
+      }
+    }
+  },
+  "utility": {
+    "name": "Masker Utilitas",
+    "icon": "⚙️",
+    "masks": {
+      "6": {
+        "name": "Hazmat Respirator",
+        "filename": "mask6.png",
+        "description": "Respirator tertutup penuh yang digunakan dalam situasi bahaya kimia, biologi, atau industri berat."
+      },
+      "7": {
+        "name": "Dust Mask",
+        "filename": "mask7.png",
+        "description": "Masker ringan untuk melindungi dari debu, serbuk kayu, atau partikel besar di lingkungan kerja."
+      },
+      "8": {
+        "name": "Half Gas Mask",
+        "filename": "mask8.png",
+        "description": "Masker setengah wajah dengan filter gas untuk perlindungan dari uap kimia dan gas beracun."
+      },
+      "9": {
+        "name": "M60G-1B",
+        "filename": "mask9.png",
+        "description": "Model respirator militer dengan desain modular dan filter ganda untuk kondisi tempur atau industri."
+      },
+      "10": {
+        "name": "NP305",
+        "filename": "mask10.png",
+        "description": "Masker industri ringan dengan filter partikulat, ideal untuk pekerjaan las atau pengecatan."
+      },
+      "11": {
+        "name": "P100",
+        "filename": "mask11.png",
+        "description": "Respirator dengan filtrasi 99.97% terhadap partikel udara, digunakan dalam pekerjaan dengan paparan tinggi."
+      },
+      "12": {
+        "name": "REikirc",
+        "filename": "mask12.png",
+        "description": "Masker respirator futuristik dengan desain ergonomis dan ventilasi aktif untuk kenyamanan bernapas."
+      },
+      "13": {
+        "name": "Type 66 (Mouth-Cover)",
+        "filename": "mask13.png",
+        "special": "mouth_position",
+        "description": "Masker minimalis yang hanya menutupi area mulut, dirancang untuk aplikasi estetika atau simulasi."
+      },
+      "14": {
+        "name": "V400",
+        "filename": "mask14.png",
+        "description": "Respirator modern dengan desain streamline dan filter karbon aktif untuk lingkungan perkotaan."
+      },
+      "15": {
+        "name": "V500",
+        "filename": "mask15.png",
+        "description": "Masker kelas premium dengan teknologi penyaringan multi-layer dan desain ergonomis."
+      }
+    }
+  },
+  "cultural": {
+    "name": "Masker Budaya",
+    "icon": "🎭",
+    "masks": {
+      "16": {
+        "name": "Hannya",
+        "filename": "mask16.png",
+        "region": "Jepang",
+        "description": "Topeng tradisional Jepang yang menggambarkan roh wanita cemburu, digunakan dalam teater Noh dan festival."
+      },
+      "17": {
+        "name": "Panji",
+        "filename": "mask17.png",
+        "region": "Jawa, Indonesia",
+        "description": "Topeng Jawa dengan ekspresi tenang dan putih bersih, melambangkan kesucian dan kebijaksanaan."
+      },
+      "18": {
+        "name": "Samurai Menpo",
+        "filename": "mask18.png",
+        "region": "Jepang",
+        "description": "Masker setengah wajah samurai Jepang yang digunakan sebagai pelindung perang dan simbol keberanian."
+      },
+      "19": {
+        "name": "Rangda",
+        "filename": "mask19.png",
+        "region": "Bali, Indonesia",
+        "description": "Topeng Bali yang melambangkan ratu para roh jahat, sering digunakan dalam tari Barong untuk menggambarkan keseimbangan antara baik dan jahat."
+      },
+      "20": {
+        "name": "Noh",
+        "filename": "mask20.png",
+        "region": "Jepang",
+        "description": "Topeng teater Jepang klasik dengan ekspresi halus dan ambigu, digunakan untuk menggambarkan emosi yang berubah."
+      },
+      "21": {
+        "name": "Mexican",
+        "filename": "mask21.png",
+        "region": "Meksiko",
+        "description": "Topeng bergaya Meksiko berwarna cerah, terinspirasi dari budaya Día de los Muertos yang melambangkan kehidupan dan kematian."
+      },
+      "22": {
+        "name": "Kenala Merah",
+        "filename": "mask22.png",
+        "region": "Jawa, Indonesia",
+        "description": "Topeng Jawa berwarna merah dengan ekspresi garang, menggambarkan karakter kuat dan ambisius dalam kisah klasik."
+      },
+      "23": {
+        "name": "Dayak",
+        "filename": "mask23.png",
+        "region": "Kalimantan, Indonesia",
+        "description": "Topeng suku Dayak Kalimantan dengan ukiran kayu rumit dan warna alami, melambangkan roh penjaga dan kekuatan alam."
+      },
+      "24": {
+        "name": "Chinese Opera",
+        "filename": "mask24.png",
+        "region": "Tiongkok",
+        "description": "Topeng tradisional Tiongkok dengan warna dan pola simbolik yang menggambarkan karakter moral dalam opera klasik."
+      },
+      "25": {
+        "name": "Barongsai",
+        "filename": "mask25.png",
+        "region": "Tiongkok",
+        "description": "Bagian wajah bawah dari kostum Barongsai, melambangkan keberuntungan dan kebahagiaan dalam budaya Tionghoa."
+      },
+      "26": {
+        "name": "Barong",
+        "filename": "mask26.png",
+        "region": "Bali, Indonesia",
+        "description": "Topeng suci Bali yang menggambarkan roh pelindung, sering digunakan dalam tarian Barong sebagai simbol kebaikan."
+      }
+    }
+  }
+}

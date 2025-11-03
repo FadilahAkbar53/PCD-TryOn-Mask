@@ -9,13 +9,25 @@ import logging
 from pathlib import Path
 from typing import List, Tuple, Dict, Any
 import matplotlib.pyplot as plt
+import random
 
+
+def setup_logging(level=logging.INFO):
+    """Setup logging configuration."""
+    logging.basicConfig(
+        level=level,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        force=True
+    )
+
+def set_seed(seed: int = 42):
+    """Set random seeds for reproducibility."""
+    random.seed(seed)
+    np.random.seed(seed)
+    # cv2 doesn't have a seed function, but we can set numpy seed which affects cv2 operations
 
 # Setup logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+setup_logging()
 logger = logging.getLogger(__name__)
 
 
@@ -44,11 +56,28 @@ def set_seed(seed: int = 42):
     logger.info(f"Random seed set to {seed}")
 
 
+def convert_numpy_types(obj):
+    """Convert numpy types to native Python types for JSON serialization."""
+    if isinstance(obj, np.integer):
+        return int(obj)
+    elif isinstance(obj, np.floating):
+        return float(obj)
+    elif isinstance(obj, np.ndarray):
+        return obj.tolist()
+    elif isinstance(obj, dict):
+        return {str(key): convert_numpy_types(value) for key, value in obj.items()}
+    elif isinstance(obj, list):
+        return [convert_numpy_types(item) for item in obj]
+    else:
+        return obj
+
 def save_json(data: Dict[Any, Any], path: str):
     """Save dictionary to JSON file."""
     Path(path).parent.mkdir(parents=True, exist_ok=True)
+    # Convert numpy types to native Python types
+    converted_data = convert_numpy_types(data)
     with open(path, 'w') as f:
-        json.dump(data, f, indent=2, default=str)
+        json.dump(converted_data, f, indent=2)
     logger.info(f"Saved JSON to {path}")
 
 

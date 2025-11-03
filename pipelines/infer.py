@@ -204,7 +204,7 @@ class ImageInference:
         # Apply masks
         if apply_mask and self.mask_overlay and len(face_boxes) > 0:
             with Timer("Mask overlay"):
-                result = self.mask_overlay.batch_overlay(result, face_boxes, enable_rotation)
+                result = self.mask_overlay.batch_overlay(result, face_boxes, enable_rotation, use_3d_rotation=True)
         
         # Draw boxes
         if show_boxes and len(face_boxes) > 0:
@@ -230,21 +230,30 @@ class VideoInference:
         
         Args:
             model_dir: Directory with trained models
-            mask_dir: Directory containing mask files (mask1.png - mask7.png)
+            mask_dir: Directory containing mask files (mask1.png - mask26.png)
         """
         self.detector = FaceDetector(model_dir)
         self.mask_dir = Path(mask_dir)
         
-        # Initialize face tracker for stability
-        self.face_tracker = FaceTracker(max_tracking_frames=8, iou_threshold=0.4)
+        # Initialize face tracker for stability (improved parameters)
+        self.face_tracker = FaceTracker(max_tracking_frames=15, iou_threshold=0.4)
         
         # Load all available masks
         self.masks: Dict[int, MaskOverlay] = {}
-        for i in range(1, 8):  # mask1.png to mask7.png
+        for i in range(1, 27):  # mask1.png to mask26.png
             mask_path = self.mask_dir / f'mask{i}.png'
             if mask_path.exists():
                 try:
-                    self.masks[i] = MaskOverlay(str(mask_path))
+                    mask_overlay = MaskOverlay(str(mask_path))
+                    
+                    # Special case for mask 13 (Type 66) - starts from mouth position
+                    if i == 13:
+                        # Adjust y_offset_ratio for mouth positioning (+0.2 from default)
+                        original_y_offset = mask_overlay.y_offset_ratio
+                        mask_overlay.y_offset_ratio = original_y_offset + 0.2
+                        logger.info(f"Mask 13 (Type 66) special positioning: y_offset adjusted from {original_y_offset:.2f} to {mask_overlay.y_offset_ratio:.2f}")
+                    
+                    self.masks[i] = mask_overlay
                     logger.info(f"Loaded mask{i}.png")
                 except Exception as e:
                     logger.warning(f"Failed to load mask{i}.png: {e}")
@@ -320,7 +329,7 @@ class VideoInference:
         
         # Apply masks to stable faces
         if self._mask_enabled and self.current_mask and len(stable_faces) > 0:
-            result = self.current_mask.batch_overlay(result, stable_faces, enable_rotation)
+            result = self.current_mask.batch_overlay(result, stable_faces, enable_rotation, use_3d_rotation=True)
         
         return result
     
@@ -425,7 +434,7 @@ class VideoInference:
                 
                 # Apply masks to stable faces
                 if mask_enabled and self.current_mask and len(stable_faces) > 0:
-                    result = self.current_mask.batch_overlay(result, stable_faces, enable_rotation)
+                    result = self.current_mask.batch_overlay(result, stable_faces, enable_rotation, use_3d_rotation=True)
                 elif mask_enabled and not self.current_mask:
                     logger.debug(f"Mask enabled but current_mask is None. current_mask_id: {self.current_mask_id}, available masks: {list(self.masks.keys())}")
                 
@@ -465,7 +474,7 @@ class VideoInference:
                         screenshot_path = f"screenshot_{frame_count}.jpg"
                         cv2.imwrite(screenshot_path, result)
                         logger.info(f"Saved screenshot: {screenshot_path}")
-                    elif key in [ord(str(i)) for i in range(1, 8)]:
+                    elif key in [ord(str(i)) for i in range(1, 10)]:  # Support keys 1-9
                         # Switch mask
                         mask_num = int(chr(key))
                         if mask_num in self.masks:
@@ -488,13 +497,13 @@ class VideoInference:
 class FaceTracker:
     """Face tracking and smoothing for stable mask overlay."""
     
-    def __init__(self, max_tracking_frames: int = 10, iou_threshold: float = 0.5):
+    def __init__(self, max_tracking_frames: int = 15, iou_threshold: float = 0.4):
         """
         Initialize face tracker.
         
         Args:
-            max_tracking_frames: Maximum frames to track without detection
-            iou_threshold: IoU threshold for face matching
+            max_tracking_frames: Maximum frames to track without detection (increased for stability)
+            iou_threshold: IoU threshold for face matching (lowered for better tracking)
         """
         self.max_tracking_frames = max_tracking_frames
         self.iou_threshold = iou_threshold
@@ -523,18 +532,32 @@ class FaceTracker:
     
     def smooth_box(self, current_box: Tuple[int, int, int, int], 
                    previous_boxes: List[Tuple[int, int, int, int]], 
-                   alpha: float = 0.7) -> Tuple[int, int, int, int]:
-        """Smooth face box using exponential moving average."""
+                   alpha: float = 0.3) -> Tuple[int, int, int, int]:
+        """Smooth face box using exponential moving average with enhanced stability."""
         if not previous_boxes:
             return current_box
         
-        # Use last box for smoothing
-        prev_box = previous_boxes[-1]
-        
-        x = int(alpha * current_box[0] + (1 - alpha) * prev_box[0])
-        y = int(alpha * current_box[1] + (1 - alpha) * prev_box[1])
-        w = int(alpha * current_box[2] + (1 - alpha) * prev_box[2])
-        h = int(alpha * current_box[3] + (1 - alpha) * prev_box[3])
+        # Use weighted average of last few boxes for better stability
+        if len(previous_boxes) >= 3:
+            # Use last 3 boxes with decreasing weights
+            weights = [0.5, 0.3, 0.2]
+            smoothed_x = sum(w * box[0] for w, box in zip(weights, previous_boxes[-3:]))
+            smoothed_y = sum(w * box[1] for w, box in zip(weights, previous_boxes[-3:]))
+            smoothed_w = sum(w * box[2] for w, box in zip(weights, previous_boxes[-3:]))
+            smoothed_h = sum(w * box[3] for w, box in zip(weights, previous_boxes[-3:]))
+            
+            # Blend with current detection
+            x = int(alpha * current_box[0] + (1 - alpha) * smoothed_x)
+            y = int(alpha * current_box[1] + (1 - alpha) * smoothed_y)
+            w = int(alpha * current_box[2] + (1 - alpha) * smoothed_w)
+            h = int(alpha * current_box[3] + (1 - alpha) * smoothed_h)
+        else:
+            # Fallback to simple smoothing
+            prev_box = previous_boxes[-1]
+            x = int(alpha * current_box[0] + (1 - alpha) * prev_box[0])
+            y = int(alpha * current_box[1] + (1 - alpha) * prev_box[1])
+            w = int(alpha * current_box[2] + (1 - alpha) * prev_box[2])
+            h = int(alpha * current_box[3] + (1 - alpha) * prev_box[3])
         
         return (x, y, w, h)
     
@@ -578,9 +601,9 @@ class FaceTracker:
                 track['consecutive_misses'] = 0
                 track['confidence'] = scores[best_match_idx] if best_match_idx < len(scores) else 0.5
                 
-                # Keep only recent boxes for smoothing
-                if len(track['boxes']) > 5:
-                    track['boxes'] = track['boxes'][-5:]
+                # Keep only recent boxes for smoothing (increased buffer for better stability)
+                if len(track['boxes']) > 8:
+                    track['boxes'] = track['boxes'][-8:]
                 
                 matched_tracks.append(track)
                 unmatched_detections.remove(best_match_idx)
@@ -608,10 +631,10 @@ class FaceTracker:
         
         self.tracked_faces = matched_tracks
         
-        # Return stable face boxes
+        # Return stable face boxes (increased stability threshold)
         stable_faces = []
         for track in self.tracked_faces:
-            if track['consecutive_misses'] <= 3:  # Only return recently seen faces
+            if track['consecutive_misses'] <= 5:  # Increased from 3 to 5 for more stability
                 stable_faces.append(track['predicted_box'])
         
         return stable_faces

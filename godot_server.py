@@ -50,9 +50,21 @@ class GodotTryOnServer:
         # Initialize socket for receiving commands from Godot
         self.command_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.command_port = 5006
-        self.command_sock.bind(('0.0.0.0', self.command_port))
-        self.command_sock.setblocking(False)  # Non-blocking to check without waiting
-        logger.info(f"Command socket listening on port {self.command_port}")
+        
+        # Enable socket reuse to prevent "Address already in use" error
+        self.command_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        
+        try:
+            self.command_sock.bind(('0.0.0.0', self.command_port))
+            self.command_sock.setblocking(False)  # Non-blocking to check without waiting
+            logger.info(f"Command socket listening on port {self.command_port}")
+        except OSError as e:
+            if e.winerror == 10048:  # Address already in use
+                logger.error(f"Port {self.command_port} is already in use. Please close any existing instances or wait a moment.")
+                logger.error("You can also try: netstat -ano | findstr :5006  to find the process using this port")
+                raise SystemExit("Cannot start server: Port already in use")
+            else:
+                raise
         
         # Initialize inference pipeline
         self.inference = VideoInference(
@@ -66,8 +78,14 @@ class GodotTryOnServer:
         self.user_adjustments = {
             'scale_width': 0.0,
             'scale_height': 0.0,
-            'y_offset': 0.0
+            'y_offset': 0.0,
+            'x_offset': 0.0,  # New: horizontal offset adjustment
+            'transparency': 1.0  # New: transparency (0.0=invisible, 1.0=opaque)
         }
+        
+        # 3D rotation settings
+        self.enable_3d_rotation = True
+        self.enable_rotation = True  # Start with rotation enabled to match UI checkbox
         
         # Client tracking
         self.client_address = None
@@ -125,7 +143,11 @@ class GodotTryOnServer:
         
         # Apply masks to stable faces if enabled
         if self.inference.mask_enabled and self.inference.current_mask and len(stable_faces) > 0:
-            result = self.inference.current_mask.batch_overlay(result, stable_faces, enable_rotation=False)
+            result = self.inference.current_mask.batch_overlay(
+                result, stable_faces, 
+                enable_rotation=self.enable_rotation, 
+                use_3d_rotation=self.enable_3d_rotation
+            )
         
         return result, len(stable_faces)
     
@@ -146,24 +168,46 @@ class GodotTryOnServer:
     def apply_user_adjustments(self):
         """Apply user adjustments to current mask."""
         if self.inference.current_mask:
-            # Get mask's default/original values from _get_optimal_scaling()
-            # This method returns (scale_width, scale_height, y_offset_ratio) based on mask ratio
+            # Get mask's default/original values
             base_scale_w, base_scale_h, base_y_offset = self.inference.current_mask._get_optimal_scaling()
+            base_x_offset = 0.03  # Default x_offset_ratio from mask initialization
+            
+            # Special case for mask 13 (Type 66) - add extra y_offset for mouth positioning
+            if self.inference.current_mask_id == 13:
+                base_y_offset += 0.2  # Additional offset for mask 13 (mouth positioning)
+                logger.debug("Applied mask 13 special y_offset (+0.2 for mouth positioning)")
             
             # Apply user adjustments (additive from base values)
             self.inference.current_mask.scale_width = max(0.1, base_scale_w + self.user_adjustments['scale_width'])
             self.inference.current_mask.scale_height = max(0.1, base_scale_h + self.user_adjustments['scale_height'])
             self.inference.current_mask.y_offset_ratio = base_y_offset + self.user_adjustments['y_offset']
+            self.inference.current_mask.x_offset_ratio = base_x_offset + self.user_adjustments['x_offset']  # Fixed: additive like others
+            
+            # Apply transparency (0.0 = invisible, 1.0 = opaque)
+            transparency = max(0.0, min(1.0, self.user_adjustments['transparency']))
+            if hasattr(self.inference.current_mask, 'alpha'):
+                self.inference.current_mask.alpha = transparency
             
             logger.info(f"Applied user adjustments: scale_w={self.inference.current_mask.scale_width:.2f}, "
                        f"scale_h={self.inference.current_mask.scale_height:.2f}, "
-                       f"y_offset={self.inference.current_mask.y_offset_ratio:.2f}")
+                       f"y_offset={self.inference.current_mask.y_offset_ratio:.2f}, "
+                       f"x_offset={self.inference.current_mask.x_offset_ratio:.2f}, "
+                       f"transparency={transparency:.2f}")
     
     def handle_command(self, command: str, processed_frame: np.ndarray):
         """Handle command from Godot client."""
         if command == "quit":
             logger.info("Quit command received from Godot")
             self.should_quit = True
+        
+        elif command == "disconnect":
+            # Client is disconnecting (e.g., going back to menu)
+            # Server should continue running for reconnection
+            logger.info("Client disconnected - server continues running")
+            # Optional: reset mask state
+            if hasattr(self.inference, '_mask_enabled'):
+                self.inference._mask_enabled = False
+            logger.info("Mask disabled after client disconnect")
         
         elif command == "mask_off":
             # Force mask to be OFF
@@ -178,7 +222,7 @@ class GodotTryOnServer:
         elif command.startswith("mask_"):
             try:
                 mask_num = int(command.split("_")[1])
-                if 1 <= mask_num <= 7:
+                if 1 <= mask_num <= 26:  # Updated to support masks 1-26
                     self.inference.switch_mask(mask_num)
                     # Apply user adjustments to new mask
                     self.apply_user_adjustments()
@@ -202,7 +246,7 @@ class GodotTryOnServer:
                     param_value = float(parts[1])  # Slider value from -0.5 to 0.5 (0 = default)
                     
                     # Store user adjustment (will be applied to all masks)
-                    if param_name in ["scale_width", "scale_height", "y_offset"]:
+                    if param_name in ["scale_width", "scale_height", "y_offset", "x_offset", "transparency"]:
                         self.user_adjustments[param_name] = param_value
                         
                         # Apply to current mask immediately
@@ -213,6 +257,22 @@ class GodotTryOnServer:
                         logger.warning(f"Unknown parameter: {param_name}")
             except (ValueError, IndexError) as e:
                 logger.warning(f"Invalid adjust command: {command} - {e}")
+        
+        elif command == "enable_3d_rotation":
+            self.enable_3d_rotation = True
+            self.enable_rotation = True  # Enable rotation when 3D is enabled
+            logger.info("3D rotation enabled")
+        
+        elif command == "disable_3d_rotation":
+            self.enable_3d_rotation = False
+            # Keep 2D rotation enabled if user wants
+            logger.info("3D rotation disabled (fallback to 2D rotation)")
+        
+        elif command == "toggle_rotation":
+            self.enable_rotation = not self.enable_rotation
+            if not self.enable_rotation:
+                self.enable_3d_rotation = False  # Disable 3D when rotation is off
+            logger.info(f"Rotation {'enabled' if self.enable_rotation else 'disabled'}")
         
         else:
             logger.warning(f"Unknown command: {command}")
@@ -304,7 +364,7 @@ class GodotTryOnServer:
                 elif key == ord('m'):
                     self.inference.toggle_mask()
                     logger.info(f"Mask {'enabled' if self.inference.mask_enabled else 'disabled'}")
-                elif ord('1') <= key <= ord('7'):
+                elif ord('1') <= key <= ord('9'):
                     mask_num = key - ord('0')
                     self.inference.switch_mask(mask_num)
                     logger.info(f"Switched to mask{mask_num}.png")
@@ -321,9 +381,24 @@ class GodotTryOnServer:
         finally:
             cap.release()
             cv2.destroyAllWindows()
-            self.sock.close()
-            self.command_sock.close()
+            self.cleanup()  # Ensure sockets are closed
             logger.info("Server stopped")
+    
+    def cleanup(self):
+        """Clean up resources and close sockets."""
+        try:
+            if hasattr(self, 'sock'):
+                self.sock.close()
+                logger.info("Video streaming socket closed")
+        except Exception as e:
+            logger.warning(f"Error closing video socket: {e}")
+        
+        try:
+            if hasattr(self, 'command_sock'):
+                self.command_sock.close()
+                logger.info("Command socket closed")
+        except Exception as e:
+            logger.warning(f"Error closing command socket: {e}")
 
 
 def main():

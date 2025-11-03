@@ -1,0 +1,365 @@
+[gd_scene load_steps=13 format=3 uid="uid://d1yg3mx7pb8k4"]
+
+[ext_resource type="Script" uid="uid://bvunj2ptyo5rv" path="res://team.gd" id="1_team"]
+[ext_resource type="Shader" uid="uid://c12nl1133ye2x" path="res://animated_gradient.gdshader" id="2_shader"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_team"]
+shader = ExtResource("2_shader")
+shader_parameter/time = 0.0
+shader_parameter/color1 = Color(0.08, 0.12, 0.2, 1)
+shader_parameter/color2 = Color(0.15, 0.2, 0.35, 1)
+shader_parameter/color3 = Color(0.12, 0.15, 0.25, 1)
+shader_parameter/wave_speed = 0.3
+shader_parameter/wave_frequency = 4.0
+
+[sub_resource type="StyleBoxFlat" id="Member1Style"]
+bg_color = Color(0.95, 0.97, 1, 0.95)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.4, 0.6, 0.9, 1)
+corner_radius_top_left = 15
+corner_radius_top_right = 15
+corner_radius_bottom_right = 15
+corner_radius_bottom_left = 15
+shadow_color = Color(0.2, 0.4, 0.7, 0.4)
+shadow_size = 10
+
+[sub_resource type="StyleBoxFlat" id="PhotoStyle1"]
+bg_color = Color(0.85, 0.9, 0.98, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.4, 0.6, 0.9, 1)
+corner_radius_top_left = 50
+corner_radius_top_right = 50
+corner_radius_bottom_right = 50
+corner_radius_bottom_left = 50
+
+[sub_resource type="StyleBoxFlat" id="Member2Style"]
+bg_color = Color(0.93, 0.96, 1, 0.95)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.3, 0.5, 0.85, 1)
+corner_radius_top_left = 15
+corner_radius_top_right = 15
+corner_radius_bottom_right = 15
+corner_radius_bottom_left = 15
+shadow_color = Color(0.2, 0.4, 0.7, 0.4)
+shadow_size = 10
+
+[sub_resource type="StyleBoxFlat" id="PhotoStyle2"]
+bg_color = Color(0.83, 0.88, 0.97, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.3, 0.5, 0.85, 1)
+corner_radius_top_left = 50
+corner_radius_top_right = 50
+corner_radius_bottom_right = 50
+corner_radius_bottom_left = 50
+
+[sub_resource type="StyleBoxFlat" id="Member3Style"]
+bg_color = Color(0.94, 0.96, 1, 0.95)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.35, 0.55, 0.88, 1)
+corner_radius_top_left = 15
+corner_radius_top_right = 15
+corner_radius_bottom_right = 15
+corner_radius_bottom_left = 15
+shadow_color = Color(0.2, 0.4, 0.7, 0.4)
+shadow_size = 10
+
+[sub_resource type="StyleBoxFlat" id="PhotoStyle3"]
+bg_color = Color(0.84, 0.89, 0.98, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.35, 0.55, 0.88, 1)
+corner_radius_top_left = 50
+corner_radius_top_right = 50
+corner_radius_bottom_right = 50
+corner_radius_bottom_left = 50
+
+[sub_resource type="StyleBoxFlat" id="BackButtonHover"]
+bg_color = Color(0.2, 0.27, 0.4, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.35, 0.45, 0.6, 0.8)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="BackButtonPressed"]
+bg_color = Color(0.12, 0.16, 0.24, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.2, 0.28, 0.4, 0.8)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="BackButtonNormal"]
+bg_color = Color(0.15, 0.2, 0.3, 0.85)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.25, 0.35, 0.5, 0.6)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[node name="Team" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_team")
+
+[node name="Background" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_team")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.08, 0.12, 0.2, 1)
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 60
+theme_override_constants/margin_top = 40
+theme_override_constants/margin_right = 60
+theme_override_constants/margin_bottom = 40
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 25
+
+[node name="TeamContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 40
+
+[node name="TitleContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/TeamContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer/TeamContainer/TitleContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_colors/font_shadow_color = Color(0.2, 0.4, 0.8, 0.5)
+theme_override_constants/shadow_offset_x = 0
+theme_override_constants/shadow_offset_y = 4
+theme_override_font_sizes/font_size = 56
+text = "Virtual Try-On Mask"
+horizontal_alignment = 1
+
+[node name="Separator1" type="HSeparator" parent="MarginContainer/VBoxContainer/TeamContainer/TitleContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="SubtitleLabel" type="Label" parent="MarginContainer/VBoxContainer/TeamContainer/TitleContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.8, 0.9, 0.9)
+theme_override_font_sizes/font_size = 32
+text = "Pengolahan Citra Digital"
+horizontal_alignment = 1
+
+[node name="SubtitleLabel2" type="Label" parent="MarginContainer/VBoxContainer/TeamContainer/TitleContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.8, 0.9, 0.9)
+theme_override_font_sizes/font_size = 28
+text = "Kelompok 2 - D4 3B"
+horizontal_alignment = 1
+
+[node name="Spacer1" type="Control" parent="MarginContainer/VBoxContainer/TeamContainer"]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+
+[node name="MembersLabel" type="Label" parent="MarginContainer/VBoxContainer/TeamContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 32
+text = "Anggota Tim"
+horizontal_alignment = 1
+
+[node name="MembersGrid" type="GridContainer" parent="MarginContainer/VBoxContainer/TeamContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/h_separation = 40
+theme_override_constants/v_separation = 30
+columns = 3
+
+[node name="Member1Panel" type="PanelContainer" parent="MarginContainer/VBoxContainer/TeamContainer/MembersGrid"]
+custom_minimum_size = Vector2(280, 200)
+layout_mode = 2
+theme_override_styles/panel = SubResource("Member1Style")
+
+[node name="Member1VBox" type="VBoxContainer" parent="MarginContainer/VBoxContainer/TeamContainer/MembersGrid/Member1Panel"]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="PhotoContainer" type="CenterContainer" parent="MarginContainer/VBoxContainer/TeamContainer/MembersGrid/Member1Panel/Member1VBox"]
+layout_mode = 2
+
+[node name="PhotoPanel" type="Panel" parent="MarginContainer/VBoxContainer/TeamContainer/MembersGrid/Member1Panel/Member1VBox/PhotoContainer"]
+custom_minimum_size = Vector2(100, 100)
+layout_mode = 2
+theme_override_styles/panel = SubResource("PhotoStyle1")
+
+[node name="PhotoLabel" type="Label" parent="MarginContainer/VBoxContainer/TeamContainer/MembersGrid/Member1Panel/Member1VBox/PhotoContainer/PhotoPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.4, 0.6, 0.9, 1)
+theme_override_font_sizes/font_size = 48
+text = "👤"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="NameLabel" type="Label" parent="MarginContainer/VBoxContainer/TeamContainer/MembersGrid/Member1Panel/Member1VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.15, 0.3, 0.6, 1)
+theme_override_font_sizes/font_size = 18
+text = "Fadilah Akbar"
+horizontal_alignment = 1
+
+[node name="NIMLabel" type="Label" parent="MarginContainer/VBoxContainer/TeamContainer/MembersGrid/Member1Panel/Member1VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.5, 0.8, 1)
+theme_override_font_sizes/font_size = 24
+text = "231524041"
+horizontal_alignment = 1
+
+[node name="Member2Panel" type="PanelContainer" parent="MarginContainer/VBoxContainer/TeamContainer/MembersGrid"]
+custom_minimum_size = Vector2(280, 200)
+layout_mode = 2
+theme_override_styles/panel = SubResource("Member2Style")
+
+[node name="Member2VBox" type="VBoxContainer" parent="MarginContainer/VBoxContainer/TeamContainer/MembersGrid/Member2Panel"]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="PhotoContainer" type="CenterContainer" parent="MarginContainer/VBoxContainer/TeamContainer/MembersGrid/Member2Panel/Member2VBox"]
+layout_mode = 2
+
+[node name="PhotoPanel" type="Panel" parent="MarginContainer/VBoxContainer/TeamContainer/MembersGrid/Member2Panel/Member2VBox/PhotoContainer"]
+custom_minimum_size = Vector2(100, 100)
+layout_mode = 2
+theme_override_styles/panel = SubResource("PhotoStyle2")
+
+[node name="PhotoLabel" type="Label" parent="MarginContainer/VBoxContainer/TeamContainer/MembersGrid/Member2Panel/Member2VBox/PhotoContainer/PhotoPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.3, 0.5, 0.85, 1)
+theme_override_font_sizes/font_size = 48
+text = "👤"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="NameLabel" type="Label" parent="MarginContainer/VBoxContainer/TeamContainer/MembersGrid/Member2Panel/Member2VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.15, 0.3, 0.6, 1)
+theme_override_font_sizes/font_size = 18
+text = "Muhammad Rafli Fadhilah"
+horizontal_alignment = 1
+
+[node name="NIMLabel" type="Label" parent="MarginContainer/VBoxContainer/TeamContainer/MembersGrid/Member2Panel/Member2VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.5, 0.8, 1)
+theme_override_font_sizes/font_size = 24
+text = "231524057"
+horizontal_alignment = 1
+
+[node name="Member3Panel" type="PanelContainer" parent="MarginContainer/VBoxContainer/TeamContainer/MembersGrid"]
+custom_minimum_size = Vector2(280, 200)
+layout_mode = 2
+theme_override_styles/panel = SubResource("Member3Style")
+
+[node name="Member3VBox" type="VBoxContainer" parent="MarginContainer/VBoxContainer/TeamContainer/MembersGrid/Member3Panel"]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="PhotoContainer" type="CenterContainer" parent="MarginContainer/VBoxContainer/TeamContainer/MembersGrid/Member3Panel/Member3VBox"]
+layout_mode = 2
+
+[node name="PhotoPanel" type="Panel" parent="MarginContainer/VBoxContainer/TeamContainer/MembersGrid/Member3Panel/Member3VBox/PhotoContainer"]
+custom_minimum_size = Vector2(100, 100)
+layout_mode = 2
+theme_override_styles/panel = SubResource("PhotoStyle3")
+
+[node name="PhotoLabel" type="Label" parent="MarginContainer/VBoxContainer/TeamContainer/MembersGrid/Member3Panel/Member3VBox/PhotoContainer/PhotoPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.35, 0.55, 0.88, 1)
+theme_override_font_sizes/font_size = 48
+text = "👤"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="NameLabel" type="Label" parent="MarginContainer/VBoxContainer/TeamContainer/MembersGrid/Member3Panel/Member3VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.15, 0.3, 0.6, 1)
+theme_override_font_sizes/font_size = 18
+text = "Muhammad Zaky Aliyashfi"
+horizontal_alignment = 1
+
+[node name="NIMLabel" type="Label" parent="MarginContainer/VBoxContainer/TeamContainer/MembersGrid/Member3Panel/Member3VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.5, 0.8, 1)
+theme_override_font_sizes/font_size = 24
+text = "231524059"
+horizontal_alignment = 1
+
+[node name="Spacer2" type="Control" parent="MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+
+[node name="BackButton" type="Button" parent="MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(220, 55)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(0.95, 0.98, 1, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/hover = SubResource("BackButtonHover")
+theme_override_styles/pressed = SubResource("BackButtonPressed")
+theme_override_styles/normal = SubResource("BackButtonNormal")
+text = "⬅ Kembali ke Menu"

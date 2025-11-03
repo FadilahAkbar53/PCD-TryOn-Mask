@@ -1,0 +1,296 @@
+[gd_scene load_steps=13 format=3 uid="uid://bm0gpeyga1f4m"]
+
+[ext_resource type="Script" uid="uid://bdoxdkpqcm8pc" path="res://main_menu.gd" id="1_abcde"]
+[ext_resource type="Shader" uid="uid://c12nl1133ye2x" path="res://animated_gradient.gdshader" id="2_shader"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_bg"]
+shader = ExtResource("2_shader")
+shader_parameter/time = 0.0
+shader_parameter/color1 = Color(0.08, 0.12, 0.2, 1)
+shader_parameter/color2 = Color(0.15, 0.2, 0.35, 1)
+shader_parameter/color3 = Color(0.12, 0.15, 0.25, 1)
+shader_parameter/wave_speed = 0.3
+shader_parameter/wave_frequency = 4.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tryon_hover"]
+bg_color = Color(0.25, 0.45, 0.75, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.5, 0.7, 1, 0.8)
+corner_radius_top_left = 15
+corner_radius_top_right = 15
+corner_radius_bottom_right = 15
+corner_radius_bottom_left = 15
+shadow_color = Color(0.3, 0.5, 0.9, 0.5)
+shadow_size = 12
+shadow_offset = Vector2(0, 6)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tryon_pressed"]
+bg_color = Color(0.15, 0.25, 0.5, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.3, 0.5, 0.8, 0.6)
+corner_radius_top_left = 15
+corner_radius_top_right = 15
+corner_radius_bottom_right = 15
+corner_radius_bottom_left = 15
+shadow_color = Color(0.1, 0.2, 0.4, 0.2)
+shadow_size = 4
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tryon_normal"]
+bg_color = Color(0.2, 0.35, 0.6, 0.9)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.4, 0.6, 0.9, 0.5)
+corner_radius_top_left = 15
+corner_radius_top_right = 15
+corner_radius_bottom_right = 15
+corner_radius_bottom_left = 15
+shadow_color = Color(0.2, 0.4, 0.8, 0.3)
+shadow_size = 8
+shadow_offset = Vector2(0, 4)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hover"]
+bg_color = Color(0.2, 0.3, 0.45, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.4, 0.5, 0.7, 0.6)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+shadow_color = Color(0.2, 0.3, 0.4, 0.4)
+shadow_size = 10
+shadow_offset = Vector2(0, 5)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pressed"]
+bg_color = Color(0.1, 0.15, 0.25, 0.9)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.2, 0.3, 0.5, 0.5)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+shadow_color = Color(0.05, 0.1, 0.2, 0.2)
+shadow_size = 3
+shadow_offset = Vector2(0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_normal"]
+bg_color = Color(0.15, 0.2, 0.3, 0.8)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.3, 0.4, 0.6, 0.4)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+shadow_color = Color(0.1, 0.15, 0.25, 0.3)
+shadow_size = 6
+shadow_offset = Vector2(0, 3)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_exit_hover"]
+bg_color = Color(0.7, 0.25, 0.25, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.9, 0.4, 0.4, 0.6)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+shadow_color = Color(0.5, 0.2, 0.2, 0.4)
+shadow_size = 10
+shadow_offset = Vector2(0, 5)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_exit_pressed"]
+bg_color = Color(0.4, 0.15, 0.15, 0.9)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.6, 0.2, 0.2, 0.5)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+shadow_color = Color(0.2, 0.05, 0.05, 0.2)
+shadow_size = 3
+shadow_offset = Vector2(0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_exit_normal"]
+bg_color = Color(0.5, 0.2, 0.2, 0.8)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.7, 0.3, 0.3, 0.4)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+shadow_color = Color(0.3, 0.1, 0.1, 0.3)
+shadow_size = 6
+shadow_offset = Vector2(0, 3)
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_abcde")
+
+[node name="AnimatedBackground" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_bg")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="DecorativeCircle1" type="Panel" parent="."]
+modulate = Color(0.3, 0.4, 0.6, 0.1)
+layout_mode = 0
+offset_left = -100.0
+offset_top = -100.0
+offset_right = 300.0
+offset_bottom = 300.0
+
+[node name="DecorativeCircle2" type="Panel" parent="."]
+modulate = Color(0.4, 0.3, 0.6, 0.08)
+layout_mode = 0
+offset_left = 1200.0
+offset_top = 500.0
+offset_right = 1700.0
+offset_bottom = 1000.0
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="TitleContainer" type="VBoxContainer" parent="CenterContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="TitleLabel" type="Label" parent="CenterContainer/VBoxContainer/TitleContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_colors/font_shadow_color = Color(0.2, 0.4, 0.8, 0.5)
+theme_override_constants/shadow_offset_x = 0
+theme_override_constants/shadow_offset_y = 4
+theme_override_font_sizes/font_size = 56
+text = "Virtual Try-On Mask"
+horizontal_alignment = 1
+
+[node name="SubtitleLabel" type="Label" parent="CenterContainer/VBoxContainer/TitleContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.8, 0.9, 0.9)
+theme_override_font_sizes/font_size = 20
+text = "Powered Face Mask Detection & Overlay"
+horizontal_alignment = 1
+
+[node name="SubtitleLabel2" type="Label" parent="CenterContainer/VBoxContainer/TitleContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.8, 0.9, 0.9)
+theme_override_font_sizes/font_size = 20
+text = "Kelompok 2 - D4 3B"
+horizontal_alignment = 1
+
+[node name="Spacer" type="Control" parent="CenterContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+
+[node name="MenuContainer" type="VBoxContainer" parent="CenterContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="TryOnButton" type="Button" parent="CenterContainer/VBoxContainer/MenuContainer"]
+custom_minimum_size = Vector2(450, 70)
+layout_mode = 2
+theme_override_colors/font_hover_color = Color(0.9, 0.95, 1, 1)
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(0.8, 0.9, 1, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 26
+theme_override_styles/hover = SubResource("StyleBoxFlat_tryon_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_tryon_pressed")
+theme_override_styles/normal = SubResource("StyleBoxFlat_tryon_normal")
+text = "🎭  Try On Mask"
+
+[node name="AboutButton" type="Button" parent="CenterContainer/VBoxContainer/MenuContainer"]
+custom_minimum_size = Vector2(450, 70)
+layout_mode = 2
+theme_override_colors/font_hover_color = Color(0.9, 0.95, 1, 1)
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 26
+theme_override_styles/hover = SubResource("StyleBoxFlat_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_pressed")
+theme_override_styles/normal = SubResource("StyleBoxFlat_normal")
+text = "ℹ️  About"
+
+[node name="TeamButton" type="Button" parent="CenterContainer/VBoxContainer/MenuContainer"]
+custom_minimum_size = Vector2(450, 70)
+layout_mode = 2
+theme_override_colors/font_hover_color = Color(0.9, 0.95, 1, 1)
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 26
+theme_override_styles/hover = SubResource("StyleBoxFlat_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_pressed")
+theme_override_styles/normal = SubResource("StyleBoxFlat_normal")
+text = "👥  Team"
+
+[node name="ExitButton" type="Button" parent="CenterContainer/VBoxContainer/MenuContainer"]
+custom_minimum_size = Vector2(450, 70)
+layout_mode = 2
+theme_override_colors/font_hover_color = Color(1, 0.8, 0.8, 1)
+theme_override_colors/font_color = Color(1, 0.9, 0.9, 1)
+theme_override_font_sizes/font_size = 26
+theme_override_styles/hover = SubResource("StyleBoxFlat_exit_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_exit_pressed")
+theme_override_styles/normal = SubResource("StyleBoxFlat_exit_normal")
+text = "🚪  Exit"
+
+[node name="VersionLabel" type="Label" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -150.0
+offset_top = -40.0
+offset_right = -20.0
+offset_bottom = -10.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.5, 0.6, 0.7, 0.6)
+theme_override_font_sizes/font_size = 14
+text = "v1.0 | ORB+BoVW+SVM"
+horizontal_alignment = 2

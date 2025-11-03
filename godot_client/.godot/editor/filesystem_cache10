@@ -1,0 +1,17 @@
+ea4bc82a6ad023ab7ee23ee620429895
+::res://::1762185347
+about.gd::GDScript/GDScript::5513796608033824533::1762174973::0::1::::<>Control<><>0<>0<><>::
+about.tscn::PackedScene::4091496833104308375::1762183157::0::1::::<><><>0<>0<><>::uid://cks6oo1341icr::::res://about.gd
+AESTHETIC_DESIGN_GUIDE.md::TextFile/TextFile::-1::1762176212::0::1::::<><><>0<>0<><>::
+animated_gradient.gdshader::Shader/Shader::6654299873056152637::1762176212::0::1::::<><><>0<>0<><>::
+icon.svg::CompressedTexture2D/CompressedTexture2D::7009593785153408357::1762173837::1762173837::1::::<><><>0<>0<>beb6d565d3d09c96ccd1f82b13e8fc05<>res://.godot/imported/icon.svg-218a8f2b3041327d8a5756f3a245f83b.ctex::
+INPUT_MAP_SETUP.md::TextFile/TextFile::-1::1762173837::0::1::::<><><>0<>0<><>::
+main_menu.gd::GDScript/GDScript::2627290900515095876::1762176397::0::1::::<>Control<><>0<>0<><>::
+main_menu.tscn::PackedScene::3280687587508504074::1762183157::0::1::::<><><>0<>0<><>::uid://bdoxdkpqcm8pc::::res://main_menu.gd<>uid://c12nl1133ye2x::::res://animated_gradient.gdshader
+MAIN_MENU_README.md::TextFile/TextFile::-1::1762175291::0::1::::<><><>0<>0<><>::
+README.md::TextFile/TextFile::-1::1762173837::0::1::::<><><>0<>0<><>::
+team.gd::GDScript/GDScript::3902480790422535519::1762175005::0::1::::<>Control<><>0<>0<><>::
+team.tscn::PackedScene::9034132023236275373::1762185305::0::1::::<><><>0<>0<><>::uid://bvunj2ptyo5rv::::res://team.gd<>res://animated_gradient.gdshader
+tryon_client.gd::GDScript::3405585145808185045::1762182997::0::1::::<>Control<><>0<>0<><>::
+tryon_client.tscn::PackedScene::4453702632147413248::1762183356::0::1::::<><><>0<>0<><>::uid://borxqwgw88b8x::::res://tryon_client.gd
+::res://godot_client/::1762175081
